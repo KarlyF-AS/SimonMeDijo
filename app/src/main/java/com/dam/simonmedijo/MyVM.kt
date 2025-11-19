@@ -2,6 +2,8 @@ package com.dam.simonmedijo
 
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 
 class MyVM : ViewModel(){
     fun comprobarEleccionEnSecuencia(color: Colores, numeroSecuencia: Int):Boolean{
@@ -12,14 +14,18 @@ class MyVM : ViewModel(){
     }
 
 
-//    fun realizarSeuencia(){
-//        MyVM.launch{
-//
-//        }
-//
-//
-//
-//    }
+    fun realizarSeuencia(){
+        viewModelScope.launch {
+            for (color in Datos.secuencia.value){
+
+
+            }
+
+        }
+
+
+
+    }
 
     fun añadirColorASecuencia(){
         var colorAleatorio  = Colores.entries.toTypedArray().random()
@@ -37,5 +43,3 @@ class MyVM : ViewModel(){
 
 
 
-
-}

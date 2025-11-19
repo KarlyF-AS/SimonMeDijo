@@ -31,6 +31,16 @@ object Datos {
         CLASE_ROJO(color = Color.Red, txt = "Rojo"),
         CLASE_VERDE(color = Color.Green, txt = "Verde"),
         CLASE_AZUL(color = Color.Blue, txt = "Azul"),
-        CLASE_MORADO(color = Color.Magenta, txt = "Mora")
+        CLASE_MORADO(color = Color.Magenta, txt = "Mora");
+        fun pasarColorANumero(): Int {
+            return when (this) {
+                CLASE_ROJO -> 0
+                CLASE_VERDE -> 1
+                CLASE_AZUL -> 2
+                CLASE_MORADO -> 3
+                else -> -1
+            }
+        }
     }
+
 
