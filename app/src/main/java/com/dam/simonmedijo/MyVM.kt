@@ -12,6 +12,28 @@ class MyVM : ViewModel(){
     }
 
 
+//    fun realizarSeuencia(){
+//        MyVM.launch{
+//
+//        }
+//
+//
+//
+//    }
+
+    fun añadirColorASecuencia(){
+        var colorAleatorio  = Colores.entries.toTypedArray().random()
+        Datos.secuencia.value.add(colorAleatorio)
+    }
+
+
+
+}
+
+
+
+
+
 
 
 
