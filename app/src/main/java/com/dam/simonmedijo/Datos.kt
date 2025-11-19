@@ -27,11 +27,11 @@ object Datos {
      * Colores utilizados
      */
 
-    enum class Colores(val color: Color, val txt: String, val encendido: Boolean = false) {
-        CLASE_ROJO(color = Color.Red, txt = "Rojo", encendido = false),
-        CLASE_VERDE(color = Color.Green, txt = "Verde", encendido = false),
-        CLASE_AZUL(color = Color.Blue, txt = "Azul", encendido = false),
-        CLASE_MORADO(color = Color.Magenta, txt = "Mora", encendido = false);
+    enum class Colores(val color: Color, val txt: String, var encendido: MutableStateFlow<Boolean> = MutableStateFlow(true)) {
+        CLASE_ROJO(color = Color.Red, txt = "Rojo", encendido = MutableStateFlow(false)),
+        CLASE_VERDE(color = Color.Green, txt = "Verde", encendido = MutableStateFlow(false)),
+        CLASE_AZUL(color = Color.Blue, txt = "Azul", encendido = MutableStateFlow(false)),
+        CLASE_MORADO(color = Color.Magenta, txt = "Mora", encendido = MutableStateFlow(false));
         fun pasarColorANumero(): Int {
             return when (this) {
                 CLASE_ROJO -> 0
