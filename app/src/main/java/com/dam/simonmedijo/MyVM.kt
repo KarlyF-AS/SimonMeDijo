@@ -42,7 +42,7 @@ class MyVM : ViewModel(){
     }
 
     fun desactivarBotonera(){
-
+        TODO()
     }
 
     fun añadirColorASecuencia(){
