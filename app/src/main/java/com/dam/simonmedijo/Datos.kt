@@ -9,6 +9,10 @@ object Datos {
         var record = MutableStateFlow(0)
         var estado = MutableStateFlow(Estado.IDLE)
         var secuencia = MutableStateFlow(mutableListOf<Colores>())
+
+
+        var currentColorEncendido = MutableStateFlow(Colores.CLASE_ROJO.encendido)
+
 }
 
     /**

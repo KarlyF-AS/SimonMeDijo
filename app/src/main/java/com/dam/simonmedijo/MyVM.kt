@@ -30,23 +30,19 @@ class MyVM : ViewModel(){
 
     fun realizarSecuencia(){
         viewModelScope.launch {
-            for (color in Datos.secuencia.value){
-                when(color){
-                    Colores.CLASE_ROJO -> Colores.CLASE_ROJO.encendido.value = true
-                    Colores.CLASE_VERDE -> Colores.CLASE_VERDE.encendido.value = true
-                    Colores.CLASE_AZUL -> Colores.CLASE_AZUL.encendido.value = true
-                    Colores.CLASE_MORADO -> Colores.CLASE_MORADO.encendido.value = true
-                }
+            for(color in Datos.secuencia.value){
+                color.encendido = true
+                Datos.currentColorEncendido.value = color.encendido
                 delay(1000)
-                desactivarBotonera()
+                color.encendido = false
+                Datos.currentColorEncendido.value = color.encendido
+
             }
         }
     }
 
     fun desactivarBotonera(){
-        for (color in Colores.entries){
-            color.encendido.value = false
-        }
+
     }
 
     fun añadirColorASecuencia(){
