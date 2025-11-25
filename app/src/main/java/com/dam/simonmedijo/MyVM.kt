@@ -31,12 +31,10 @@ class MyVM : ViewModel(){
     fun realizarSecuencia(){
         viewModelScope.launch {
             for(color in Datos.secuencia.value){
-                color.encendido = true
-                Datos.currentColorEncendido.value = color.encendido
+                Datos.currentColorEncendido.value = color
                 delay(1000)
-                color.encendido = false
-                Datos.currentColorEncendido.value = color.encendido
-
+                Datos.currentColorEncendido.value = null
+                delay(1000)
             }
         }
     }

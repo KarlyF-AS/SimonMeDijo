@@ -11,7 +11,7 @@ object Datos {
         var secuencia = MutableStateFlow(mutableListOf<Colores>())
 
 
-        var currentColorEncendido = MutableStateFlow(Colores.CLASE_ROJO.encendido)
+        var currentColorEncendido: MutableStateFlow<Colores?> = MutableStateFlow(null)
 
 }
 
@@ -31,11 +31,11 @@ object Datos {
      * Colores utilizados
      */
 
-    enum class Colores(val color: Color, val txt: String, var encendido: Boolean) {
-        CLASE_ROJO(color = Color.Red, txt = "Rojo", encendido = false),
-        CLASE_VERDE(color = Color.Green, txt = "Verde", encendido = false),
-        CLASE_AZUL(color = Color.Blue, txt = "Azul", encendido = false),
-        CLASE_MORADO(color = Color.Magenta, txt = "Mora", encendido = false);
+    enum class Colores(val color: Color, val txt: String) {
+        CLASE_ROJO(color = Color.Red, txt = "Rojo"),
+        CLASE_VERDE(color = Color.Green, txt = "Verde"),
+        CLASE_AZUL(color = Color.Blue, txt = "Azul"),
+        CLASE_MORADO(color = Color.Magenta, txt = "Mora");
         fun pasarColorANumero(): Int {
             return when (this) {
                 CLASE_ROJO -> 0
