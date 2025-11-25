@@ -1,5 +1,6 @@
 package com.dam.simonmedijo
 
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,12 +30,17 @@ class MyVM : ViewModel(){
 
     fun realizarSecuencia(){
         viewModelScope.launch {
+            Datos.estado.value = Estado.GENERAR_SECUENCIA
+            Log.d("App", "Estado de la secuencia: ${Datos.estado.value}")
+
             for(color in Datos.secuencia.value){
                 Datos.currentColorEncendido.value = color
                 delay(1000)
                 Datos.currentColorEncendido.value = null
                 delay(1000)
             }
+            Datos.estado.value = Estado.ELECCION_USUARIO
+            Log.d("App", "Estado de la secuencia: ${Datos.estado.value}")
         }
     }
 
@@ -54,6 +60,17 @@ class MyVM : ViewModel(){
     fun iniciarJuego(){
         generarSecuencia()
         realizarSecuencia()
+    }
+
+    fun colorSeleccionado(colorSelect:Colores){
+        if(comprobarEleccionEnSecuencia(colorSelect, posicion)){
+            posicion++
+        }else{
+            posicion = 0
+            Log.d("App", "ERROR")
+            Datos.estado.value = Estado.FINALIZADO
+        }
+
     }
 
 
