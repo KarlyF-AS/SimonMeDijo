@@ -47,6 +47,15 @@ class MyVM : ViewModel(){
         Datos.secuencia.value.add(colorAleatorio)
     }
 
+    fun generarSecuencia(){
+        Datos.secuencia.value = mutableListOf( Colores.CLASE_ROJO, Colores.CLASE_VERDE, Colores.CLASE_AZUL, Colores.CLASE_MORADO)
+    }
+
+    fun iniciarJuego(){
+        generarSecuencia()
+        realizarSecuencia()
+    }
+
 
 
 
