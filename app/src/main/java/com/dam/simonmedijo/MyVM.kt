@@ -27,7 +27,6 @@ class MyVM : ViewModel(){
         return false
     }
 
-
     fun realizarSecuencia(){
         viewModelScope.launch {
             for(color in Datos.secuencia.value){
@@ -47,6 +46,8 @@ class MyVM : ViewModel(){
         var colorAleatorio  = Colores.entries.toTypedArray().random()
         Datos.secuencia.value.add(colorAleatorio)
     }
+
+
 
 
 
