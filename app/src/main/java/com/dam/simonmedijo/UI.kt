@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,16 +21,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import kotlinx.coroutines.Job
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.min
 
+
+//usar job para rompoer la corrutina
 @Composable
 fun IU() {
     val myVM = MyVM()
     Botonera(myVM)
+
 }
 
 /**
@@ -37,6 +52,7 @@ fun IU() {
  */
 @Composable
 fun Botonera(myVM: MyVM) {
+    val scope = rememberCoroutineScope()
     //Color actual que se va a encender
     val currentColor: Colores? = Datos.currentColorEncendido.collectAsState().value
     // Estado del juego
@@ -95,6 +111,7 @@ fun Botonera(myVM: MyVM) {
 
 
     Column(modifier = Modifier.padding(16.dp)) {
+        var colorParaSonar by remember { mutableStateOf<Colores?>(null) }
 
 
         Row(
@@ -104,7 +121,7 @@ fun Botonera(myVM: MyVM) {
         ) {
             // Contador Izquierda, muestra la ronda actual
             Text(
-                text = "Ronda: "+Datos.ronda.value.toString(),
+                text = "Ronda: "+Datos.ronda.collectAsState().value.toString(),
                 fontSize = 18.sp,
                 modifier = Modifier
                     .border(2.dp, Color.Black, shape = RoundedCornerShape(12.dp))
@@ -114,7 +131,7 @@ fun Botonera(myVM: MyVM) {
 
             // Contador Derecha, muestra el record
             Text(
-                text = "Récord: "+Datos.record.value.toString(),
+                text = "Récord: "+Datos.record.collectAsState().value.toString(),
                 fontSize = 18.sp,
                 modifier = Modifier
                     .border(2.dp, Color.Black, shape = RoundedCornerShape(12.dp))
@@ -127,7 +144,9 @@ fun Botonera(myVM: MyVM) {
             // Rojo
             Button(
                 enabled = botoneraIsActive,
-                onClick = { myVM.colorSeleccionado(Colores.CLASE_ROJO) },
+                onClick = { myVM.colorSeleccionado(Colores.CLASE_ROJO)
+                          colorParaSonar = Colores.CLASE_ROJO
+                          },
                 modifier = Modifier.size(150.dp).padding(4.dp),
                 colors = buttonColorsFor(
                     base = Colores.CLASE_ROJO.color,
@@ -138,7 +157,9 @@ fun Botonera(myVM: MyVM) {
             // Verde
             Button(
                 enabled = botoneraIsActive,
-                onClick = { myVM.colorSeleccionado(Colores.CLASE_VERDE) },
+                onClick = { myVM.colorSeleccionado(Colores.CLASE_VERDE) 
+                          colorParaSonar = Colores.CLASE_VERDE
+                          },
                 modifier = Modifier.size(150.dp).padding(4.dp),
                 colors = buttonColorsFor(
                     base = Colores.CLASE_VERDE.color,
@@ -151,7 +172,9 @@ fun Botonera(myVM: MyVM) {
             // Azul
             Button(
                 enabled = botoneraIsActive,
-                onClick = { myVM.colorSeleccionado(Colores.CLASE_AZUL) },
+                onClick = { myVM.colorSeleccionado(Colores.CLASE_AZUL)
+                          colorParaSonar = Colores.CLASE_AZUL
+                          },
                 modifier = Modifier.size(150.dp).padding(4.dp),
                 colors = buttonColorsFor(
                     base = Colores.CLASE_AZUL.color,
@@ -162,13 +185,20 @@ fun Botonera(myVM: MyVM) {
             // Morado
             Button(
                 enabled = botoneraIsActive,
-                onClick = { myVM.colorSeleccionado(Colores.CLASE_MORADO) },
+                onClick = {
+                    myVM.colorSeleccionado(Colores.CLASE_MORADO)
+                    colorParaSonar = Colores.CLASE_MORADO
+                          },
                 modifier = Modifier.size(150.dp).padding(4.dp),
                 colors = buttonColorsFor(
                     base = Colores.CLASE_MORADO.color,
                     isLit = debeIluminar(Colores.CLASE_MORADO)
                 )
             ) { Text("Morado", fontSize = 18.sp) }
+        }
+        colorParaSonar?.let { color ->
+            ejecutarSonido(color)
+            colorParaSonar = null // reset
         }
         // Botón de start y de reinicio
         Row {
@@ -195,11 +225,53 @@ fun Botonera(myVM: MyVM) {
                     .border(2.dp, Color.Black, shape = RoundedCornerShape(12.dp))
                     .background(Color.LightGray, shape = RoundedCornerShape(12.dp))
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = TextAlign.Center
             )
         }
+        LaunchedEffect(estado) {
+            if (estado == Estado.FINALIZADO) {
+                colorParaSonar = null // Bloquea cualquier sonido pendiente
+            }
+        }
+
     }
 }
+
+
+/**
+ * Corrutina que maneja los sonidos de error y los sonidos de acierto
+ */
+@Composable
+fun ejecutarSonido(color: Colores) {
+    LaunchedEffect(color) {
+        val sonidoError = when ((1..4).random()) {
+            1 -> Datos.sonidoError1
+            2 -> Datos.sonidoError2
+            3 -> Datos.sonidoError3
+            4 -> Datos.sonidoError4
+            else -> Datos.sonidoError1
+        }
+
+        val sonidoAcierto = when (color) {
+            Colores.CLASE_ROJO -> Datos.sonidoRojo
+            Colores.CLASE_VERDE -> Datos.sonidoVerde
+            Colores.CLASE_AZUL -> Datos.sonidoAzul
+            Colores.CLASE_MORADO -> Datos.sonidoAmarillo
+        }
+        var sonido = sonidoError
+        when(Datos.estado.value){
+            Estado.GENERAR_SECUENCIA -> sonido = sonidoAcierto
+            Estado.ELECCION_USUARIO -> sonido = sonidoAcierto
+            Estado.FINALIZADO -> sonido = sonidoError
+            else -> sonido = sonidoAcierto
+        }// Se ejecuta cada vez que cambia 'color'
+
+        Datos.soundPool.play(sonido, 1f, 1f, 0, 0, 1f)
+        delay(1500) // opcional
+    }
+}
+
+
 
 
 @Preview(showBackground = true)

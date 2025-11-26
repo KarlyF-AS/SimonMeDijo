@@ -1,5 +1,7 @@
 package com.dam.simonmedijo
 
+import android.content.Context
+import android.media.SoundPool
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -13,6 +15,15 @@ object Datos {
 
         var currentColorEncendido: MutableStateFlow<Colores?> = MutableStateFlow(null) // El color que se va a encender en cada fase de la ronda
 
+        lateinit var soundPool: SoundPool
+        var sonidoVerde = 0
+        var sonidoRojo = 0
+        var sonidoAzul = 0
+        var sonidoAmarillo = 0
+        var sonidoError1 = 0
+        var sonidoError2 = 0
+        var sonidoError3 = 0
+        var sonidoError4 = 0
 
 }
 
@@ -44,6 +55,21 @@ enum class Estado(val botoneraIsActive: Boolean, val botonStartIsActive: Boolean
         CLASE_MORADO(color = Color.Magenta, txt = "Mora")
     }
 
-
-
+/**
+ * Inicializa los sonidos del juego
+ * @author Daniel Figueroa Vidal
+ */
+fun inicializarSonidos(context: Context) { // El contexto es necesario para cargar los sonidos
+    Datos.soundPool = SoundPool.Builder()
+        .setMaxStreams(8) // Aumentado para manejar más sonidos simultáneos
+        .build()
+    Datos.sonidoVerde = Datos.soundPool.load(context, R.raw.do_alto, 1)
+    Datos.sonidoRojo = Datos.soundPool.load(context, R.raw.mi, 1)
+    Datos.sonidoAzul = Datos.soundPool.load(context, R.raw.sol, 1)
+    Datos.sonidoAmarillo = Datos.soundPool.load(context, R.raw.do_bajo, 1)
+    Datos.sonidoError1 = Datos.soundPool.load(context, R.raw.error_1, 1)
+    Datos.sonidoError2 = Datos.soundPool.load(context, R.raw.error_2, 1)
+    Datos.sonidoError3 = Datos.soundPool.load(context, R.raw.error_3, 1)
+    Datos.sonidoError4 = Datos.soundPool.load(context, R.raw.error_4, 1)
+}
 

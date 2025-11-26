@@ -16,6 +16,7 @@ import com.dam.simonmedijo.ui.theme.SimonMeDijoTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        inicializarSonidos(this)
         enableEdgeToEdge()
         setContent {
             SimonMeDijoTheme {

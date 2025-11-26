@@ -83,12 +83,16 @@ class MyVM : ViewModel(){
             }
 
         }else{ // Si el usuario falla la secuencia
+
             Datos.secuencia.value = mutableListOf() // Reiniciamos la secuencia
             Datos.ronda.value = 0
             comprobarRecord() // Comprobamos si es record, para actualizarlo si hace falta
             posicion = 0
             Log.d("App", "ERROR")
             Datos.estado.value = Estado.FINALIZADO //Cambiamos el estado para el correcto manejo de botones
+//            viewModelScope.launch {
+//                ejecutarSonidoError()
+//            }
         }
 
 
@@ -109,6 +113,8 @@ class MyVM : ViewModel(){
         if(Datos.ronda.value > Datos.record.value)
             Datos.record.value = Datos.ronda.value
     }
+
+
 
 
 
