@@ -9,6 +9,9 @@ object Datos {
         var record = MutableStateFlow(0)
         var estado = MutableStateFlow(Estado.IDLE)
         var secuencia = MutableStateFlow(mutableListOf<Colores>())
+
+        var currentColorEncendido: MutableStateFlow<Colores?> = MutableStateFlow(null)
+
 }
 
     /**
@@ -16,11 +19,11 @@ object Datos {
      *
      */
 
-    enum class Estado(val botoneraIsActive: Boolean, val botonStartIsActive: Boolean) {
-        IDLE( botoneraIsActive = false, botonStartIsActive = true ),
-        GENERAR_SECUENCIA( botoneraIsActive = false, botonStartIsActive = false),
-        ELECCION_USUARIO( botoneraIsActive = true, botonStartIsActive = false),
-        FINALIZADO( botoneraIsActive = false, botonStartIsActive = true)
+    enum class Estado(val botoneraIsActive: Boolean, val botonStartIsActive: Boolean, val textoPanel: String) {
+        IDLE( botoneraIsActive = false, botonStartIsActive = true, textoPanel = "Presiona Start para comenzar" ),
+        GENERAR_SECUENCIA( botoneraIsActive = false, botonStartIsActive = false, textoPanel = "Generando secuencia"),
+        ELECCION_USUARIO( botoneraIsActive = true, botonStartIsActive = false, textoPanel = "Adivina la secuencia"),
+        FINALIZADO( botoneraIsActive = false, botonStartIsActive = true, textoPanel = "Fallaste, vuelve a intentarlo")
     }
 
     /**
@@ -31,6 +34,18 @@ object Datos {
         CLASE_ROJO(color = Color.Red, txt = "Rojo"),
         CLASE_VERDE(color = Color.Green, txt = "Verde"),
         CLASE_AZUL(color = Color.Blue, txt = "Azul"),
-        CLASE_MORADO(color = Color.Magenta, txt = "Mora")
+        CLASE_MORADO(color = Color.Magenta, txt = "Mora");
+        fun pasarColorANumero(): Int {
+            return when (this) {
+                CLASE_ROJO -> 0
+                CLASE_VERDE -> 1
+                CLASE_AZUL -> 2
+                CLASE_MORADO -> 3
+                else -> -1
+            }
+        }
     }
+
+
+
 
