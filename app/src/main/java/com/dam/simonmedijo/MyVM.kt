@@ -83,12 +83,16 @@ class MyVM : ViewModel(){
             }
 
         }else{ // Si el usuario falla la secuencia
+
             Datos.secuencia.value = mutableListOf() // Reiniciamos la secuencia
             Datos.ronda.value = 0
             comprobarRecord() // Comprobamos si es record, para actualizarlo si hace falta
             posicion = 0
             Log.d("App", "ERROR")
             Datos.estado.value = Estado.FINALIZADO //Cambiamos el estado para el correcto manejo de botones
+            viewModelScope.launch {
+                ejecutarSonidoError()
+            }
         }
 
 
@@ -109,6 +113,25 @@ class MyVM : ViewModel(){
         if(Datos.ronda.value > Datos.record.value)
             Datos.record.value = Datos.ronda.value
     }
+
+    /**
+     * Ejecuta un sonido de error aleatorio
+     * @author Daniel Figueroa Vidal
+     */
+    suspend fun ejecutarSonidoError(){
+        val sonidoError = when ((1..4).random()) {
+            1 -> Datos.sonidoError1
+            2 -> Datos.sonidoError2
+            3 -> Datos.sonidoError3
+            4 -> Datos.sonidoError4
+            else -> Datos.sonidoError1
+        }
+        Datos.soundPool.autoPause()
+        Datos.soundPool.play(sonidoError, 1f, 1f, 0, 0, 1f)
+        delay(1500)
+
+    }
+
 
 
 
