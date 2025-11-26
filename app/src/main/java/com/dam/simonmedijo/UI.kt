@@ -101,7 +101,7 @@ fun Botonera(myVM: MyVM) {
         ) {
             // Contador Izquierda
             Text(
-                text = "Ronda: 0", // Placeholder
+                text = "Ronda: "+Datos.ronda.value.toString(), // Placeholder
                 fontSize = 18.sp,
                 modifier = Modifier
                     .border(2.dp, Color.Black, shape = RoundedCornerShape(12.dp))
@@ -111,7 +111,7 @@ fun Botonera(myVM: MyVM) {
 
             // Contador Derecha
             Text(
-                text = "Récord: 0", // Placeholder
+                text = "Récord: "+Datos.record.value.toString(), // Placeholder
                 fontSize = 18.sp,
                 modifier = Modifier
                     .border(2.dp, Color.Black, shape = RoundedCornerShape(12.dp))

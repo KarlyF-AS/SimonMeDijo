@@ -64,11 +64,13 @@ class MyVM : ViewModel(){
             posicion++
 
         }else{
+            comprobarRecord()
             posicion = 0
             Log.d("App", "ERROR")
             Datos.estado.value = Estado.FINALIZADO
         }
         if(posicion == Datos.secuencia.value.size) {
+            Datos.ronda.value++
             añadirColorASecuencia()
             realizarSecuencia()
             posicion = 0
@@ -78,6 +80,11 @@ class MyVM : ViewModel(){
 
     fun volverAlIdle(){
         Datos.estado.value = Estado.IDLE
+    }
+
+    fun comprobarRecord(){
+        if(Datos.ronda.value > Datos.record.value)
+            Datos.record.value = Datos.ronda.value
     }
 
 
