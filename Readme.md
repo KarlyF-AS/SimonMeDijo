@@ -6,5 +6,5 @@ flowchart TD
             Secuencia"])
     C -- Fallo/Error --> E(["Final"])
     C -- Acierta la secuencia --> B
-    E -- Presiona Restart --> B
+    E -- Presiona Restart --> A
 ```
