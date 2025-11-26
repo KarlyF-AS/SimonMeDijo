@@ -37,7 +37,6 @@ enum class Estado(val botoneraIsActive: Boolean, val botonStartIsActive: Boolean
      * @param color Color
      * @param txt String
      */
-
     enum class Colores(val color: Color, val txt: String) {
         CLASE_ROJO(color = Color.Red, txt = "Rojo"),
         CLASE_VERDE(color = Color.Green, txt = "Verde"),
