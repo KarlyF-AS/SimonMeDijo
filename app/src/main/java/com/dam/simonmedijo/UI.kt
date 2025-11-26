@@ -121,7 +121,7 @@ fun Botonera(myVM: MyVM) {
         ) {
             // Contador Izquierda, muestra la ronda actual
             Text(
-                text = "Ronda: "+Datos.ronda.value.toString(),
+                text = "Ronda: "+Datos.ronda.collectAsState().value.toString(),
                 fontSize = 18.sp,
                 modifier = Modifier
                     .border(2.dp, Color.Black, shape = RoundedCornerShape(12.dp))
@@ -131,7 +131,7 @@ fun Botonera(myVM: MyVM) {
 
             // Contador Derecha, muestra el record
             Text(
-                text = "Récord: "+Datos.record.value.toString(),
+                text = "Récord: "+Datos.record.collectAsState().value.toString(),
                 fontSize = 18.sp,
                 modifier = Modifier
                     .border(2.dp, Color.Black, shape = RoundedCornerShape(12.dp))
@@ -237,15 +237,35 @@ fun Botonera(myVM: MyVM) {
     }
 }
 
+
+/**
+ * Corrutina que maneja los sonidos de error y los sonidos de acierto
+ */
 @Composable
 fun ejecutarSonido(color: Colores) {
-    LaunchedEffect(color) { // Se ejecuta cada vez que cambia 'color'
-        val sonido = when (color) {
+    LaunchedEffect(color) {
+        val sonidoError = when ((1..4).random()) {
+            1 -> Datos.sonidoError1
+            2 -> Datos.sonidoError2
+            3 -> Datos.sonidoError3
+            4 -> Datos.sonidoError4
+            else -> Datos.sonidoError1
+        }
+
+        val sonidoAcierto = when (color) {
             Colores.CLASE_ROJO -> Datos.sonidoRojo
             Colores.CLASE_VERDE -> Datos.sonidoVerde
             Colores.CLASE_AZUL -> Datos.sonidoAzul
             Colores.CLASE_MORADO -> Datos.sonidoAmarillo
         }
+        var sonido = sonidoError
+        when(Datos.estado.value){
+            Estado.GENERAR_SECUENCIA -> sonido = sonidoAcierto
+            Estado.ELECCION_USUARIO -> sonido = sonidoAcierto
+            Estado.FINALIZADO -> sonido = sonidoError
+            else -> sonido = sonidoAcierto
+        }// Se ejecuta cada vez que cambia 'color'
+
         Datos.soundPool.play(sonido, 1f, 1f, 0, 0, 1f)
         delay(1500) // opcional
     }

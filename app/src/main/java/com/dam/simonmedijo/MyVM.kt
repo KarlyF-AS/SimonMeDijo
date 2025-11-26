@@ -90,9 +90,9 @@ class MyVM : ViewModel(){
             posicion = 0
             Log.d("App", "ERROR")
             Datos.estado.value = Estado.FINALIZADO //Cambiamos el estado para el correcto manejo de botones
-            viewModelScope.launch {
-                ejecutarSonidoError()
-            }
+//            viewModelScope.launch {
+//                ejecutarSonidoError()
+//            }
         }
 
 
@@ -114,23 +114,6 @@ class MyVM : ViewModel(){
             Datos.record.value = Datos.ronda.value
     }
 
-    /**
-     * Ejecuta un sonido de error aleatorio
-     * @author Daniel Figueroa Vidal
-     */
-    suspend fun ejecutarSonidoError(){
-        val sonidoError = when ((1..4).random()) {
-            1 -> Datos.sonidoError1
-            2 -> Datos.sonidoError2
-            3 -> Datos.sonidoError3
-            4 -> Datos.sonidoError4
-            else -> Datos.sonidoError1
-        }
-        Datos.soundPool.autoPause()
-        Datos.soundPool.play(sonidoError, 1f, 1f, 0, 0, 1f)
-        delay(1500)
-
-    }
 
 
 
