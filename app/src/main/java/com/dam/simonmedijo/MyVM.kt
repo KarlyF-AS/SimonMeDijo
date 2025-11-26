@@ -53,24 +53,31 @@ class MyVM : ViewModel(){
         Datos.secuencia.value.add(colorAleatorio)
     }
 
-    fun generarSecuencia(){
-        Datos.secuencia.value = mutableListOf( Colores.CLASE_ROJO, Colores.CLASE_VERDE, Colores.CLASE_AZUL, Colores.CLASE_MORADO)
-    }
 
     fun iniciarJuego(){
-        generarSecuencia()
+        añadirColorASecuencia()
         realizarSecuencia()
     }
 
     fun colorSeleccionado(colorSelect:Colores){
         if(comprobarEleccionEnSecuencia(colorSelect, posicion)){
             posicion++
+
         }else{
             posicion = 0
             Log.d("App", "ERROR")
             Datos.estado.value = Estado.FINALIZADO
         }
+        if(posicion == Datos.secuencia.value.size) {
+            añadirColorASecuencia()
+            realizarSecuencia()
+            posicion = 0
+        }
 
+    }
+
+    fun volverAlIdle(){
+        Datos.estado.value = Estado.IDLE
     }
 
 

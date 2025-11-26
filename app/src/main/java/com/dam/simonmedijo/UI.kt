@@ -1,9 +1,13 @@
 package com.dam.simonmedijo
 
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -12,8 +16,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.tooling.preview.Preview
 
 import androidx.compose.ui.unit.dp
@@ -37,6 +43,10 @@ fun Botonera(myVM: MyVM) {
 
     val botoneraIsActive = estado.botoneraIsActive
     val botonStartIsActive = estado.botonStartIsActive
+
+
+
+
 
     @Composable
     fun buttonColorsFor(base: Color, isLit: Boolean): ButtonColors {
@@ -82,6 +92,33 @@ fun Botonera(myVM: MyVM) {
 
 
     Column(modifier = Modifier.padding(16.dp)) {
+
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Contador Izquierda
+            Text(
+                text = "Ronda: 0", // Placeholder
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .border(2.dp, Color.Black, shape = RoundedCornerShape(12.dp))
+                    .background(Color.LightGray, shape = RoundedCornerShape(12.dp))
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+
+            // Contador Derecha
+            Text(
+                text = "Récord: 0", // Placeholder
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .border(2.dp, Color.Black, shape = RoundedCornerShape(12.dp))
+                    .background(Color.LightGray, shape = RoundedCornerShape(12.dp))
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+        }
 
         Row {
             // Rojo
@@ -135,10 +172,12 @@ fun Botonera(myVM: MyVM) {
             Column {
                 Button(
                     enabled = botonStartIsActive,
-                    onClick = { myVM.iniciarJuego() },
+                    onClick = { if(Datos.estado.value == Estado.IDLE) myVM.iniciarJuego()
+                              else if (Datos.estado.value == Estado.FINALIZADO) myVM.volverAlIdle()},
                     modifier = Modifier.size(150.dp).padding(4.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
-                ) { Text("Inicio", fontSize = 18.sp, color = Color.White) }
+                ) { Text(text = if (Datos.estado.collectAsState().value == Estado.IDLE) "Inicio"
+                    else if (Datos.estado.collectAsState().value == Estado.FINALIZADO)"Reiniciar" else "Generando", fontSize = 18.sp, color = Color.White) }
             }
         }
     }
