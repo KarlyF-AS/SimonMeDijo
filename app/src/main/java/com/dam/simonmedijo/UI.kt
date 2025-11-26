@@ -44,10 +44,6 @@ fun Botonera(myVM: MyVM) {
     val botoneraIsActive = estado.botoneraIsActive
     val botonStartIsActive = estado.botonStartIsActive
 
-
-
-
-
     @Composable
     fun buttonColorsFor(base: Color, isLit: Boolean): ButtonColors {
         val finalColor = when (estado) {
@@ -179,6 +175,18 @@ fun Botonera(myVM: MyVM) {
                 ) { Text(text = if (Datos.estado.collectAsState().value == Estado.IDLE) "Inicio"
                     else if (Datos.estado.collectAsState().value == Estado.FINALIZADO)"Reiniciar" else "Generando", fontSize = 18.sp, color = Color.White) }
             }
+        }
+        Row{
+            Text(
+                text = Datos.estado.collectAsState().value.textoPanel,
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(2.dp, Color.Black, shape = RoundedCornerShape(12.dp))
+                    .background(Color.LightGray, shape = RoundedCornerShape(12.dp))
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
         }
     }
 }

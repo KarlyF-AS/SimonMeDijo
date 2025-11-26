@@ -44,10 +44,6 @@ class MyVM : ViewModel(){
         }
     }
 
-    fun desactivarBotonera(){
-        TODO()
-    }
-
     fun añadirColorASecuencia(){
         var colorAleatorio  = Colores.entries.toTypedArray().random()
         Datos.secuencia.value.add(colorAleatorio)
@@ -62,19 +58,22 @@ class MyVM : ViewModel(){
     fun colorSeleccionado(colorSelect:Colores){
         if(comprobarEleccionEnSecuencia(colorSelect, posicion)){
             posicion++
+            if(posicion == Datos.secuencia.value.size) {
+                Datos.ronda.value++
+                añadirColorASecuencia()
+                realizarSecuencia()
+                posicion = 0
+            }
 
         }else{
+            Datos.secuencia.value = mutableListOf()
+            Datos.ronda.value = 0
             comprobarRecord()
             posicion = 0
             Log.d("App", "ERROR")
             Datos.estado.value = Estado.FINALIZADO
         }
-        if(posicion == Datos.secuencia.value.size) {
-            Datos.ronda.value++
-            añadirColorASecuencia()
-            realizarSecuencia()
-            posicion = 0
-        }
+
 
     }
 

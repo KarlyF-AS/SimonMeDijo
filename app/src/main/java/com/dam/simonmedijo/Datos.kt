@@ -10,7 +10,6 @@ object Datos {
         var estado = MutableStateFlow(Estado.IDLE)
         var secuencia = MutableStateFlow(mutableListOf<Colores>())
 
-
         var currentColorEncendido: MutableStateFlow<Colores?> = MutableStateFlow(null)
 
 }
@@ -20,11 +19,11 @@ object Datos {
      *
      */
 
-    enum class Estado(val botoneraIsActive: Boolean, val botonStartIsActive: Boolean) {
-        IDLE( botoneraIsActive = false, botonStartIsActive = true ),
-        GENERAR_SECUENCIA( botoneraIsActive = false, botonStartIsActive = false),
-        ELECCION_USUARIO( botoneraIsActive = true, botonStartIsActive = false),
-        FINALIZADO( botoneraIsActive = false, botonStartIsActive = true)
+    enum class Estado(val botoneraIsActive: Boolean, val botonStartIsActive: Boolean, val textoPanel: String) {
+        IDLE( botoneraIsActive = false, botonStartIsActive = true, textoPanel = "Presiona Start para comenzar" ),
+        GENERAR_SECUENCIA( botoneraIsActive = false, botonStartIsActive = false, textoPanel = "Generando secuencia"),
+        ELECCION_USUARIO( botoneraIsActive = true, botonStartIsActive = false, textoPanel = "Adivina la secuencia"),
+        FINALIZADO( botoneraIsActive = false, botonStartIsActive = true, textoPanel = "Fallaste, vuelve a intentarlo")
     }
 
     /**
