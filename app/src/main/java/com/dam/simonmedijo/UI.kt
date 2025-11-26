@@ -74,15 +74,15 @@ fun Botonera(myVM: MyVM) {
         // Determina el color final del botón según el estado del juego.
         val finalColor = when (estado) {
             Estado.GENERAR_SECUENCIA -> if (isLit) base else base.copy(
-                red = base.red * 0.5f + 0.5f,
-                green = base.green * 0.5f + 0.5f,
-                blue = base.blue * 0.5f + 0.5f
+                red = base.red * 0.25f,
+                green = base.green * 0.25f,
+                blue = base.blue * 0.25f
             ) // En la secuencia, ilumina el botón actual y apaga los demás.
             Estado.ELECCION_USUARIO -> base                     // Durante la elección del usuario, todos los botones están iluminados y activos.
             else -> base.copy( // En IDLE y FINALIZADO, todos los botones están apagados (color claro).
-                red = base.red * 0.5f + 0.5f,
-                green = base.green * 0.5f + 0.5f,
-                blue = base.blue * 0.5f + 0.5f
+                red = base.red * 0.25f,
+                green = base.green * 0.25f,
+                blue = base.blue * 0.25f
             )
         }
         // Retorna la configuración de colores. Se usa el mismo color para el estado deshabilitado para mantener la apariencia visual.
@@ -110,7 +110,11 @@ fun Botonera(myVM: MyVM) {
 
 
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
         var colorParaSonar by remember { mutableStateOf<Colores?>(null) }
 
 
