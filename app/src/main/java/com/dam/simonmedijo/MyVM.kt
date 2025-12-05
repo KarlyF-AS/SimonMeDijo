@@ -1,131 +1,103 @@
 package com.dam.simonmedijo
 
+import android.content.Context
 import android.util.Log
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.State
 
-class MyVM : ViewModel(){
+class MyVM : ViewModel() {
 
-    var posicion = 0 // Esta es la posición de secuencia de elección del usuario
+    var posicion = 0
+    private lateinit var historialRecord: HistorialRecord
+    private val _recordConFecha = mutableStateOf<Record?>(null)
+    val recordConFecha: State<Record?> get() = _recordConFecha
 
-    /**
-     * Comprueba si el color seleccionado por el usuario es el mismo que el de la secuencia
-     * @param color Colores
-     * @param numeroSecuencia Int
-     * @author Daniel Figueroa Vidal
-     * @return Boolean
-     */
-    fun comprobarEleccionEnSecuencia(color: Colores, numeroSecuencia: Int):Boolean{ //
-        if(Datos.secuencia.value[numeroSecuencia] == color){
-            return true
-        }
-        return false
+    fun inicializarHistorial(context: Context) {
+        historialRecord = RecordSharedP(context)
+        cargarRecordInicial()
     }
 
-    /**
-     * Realiza la secuencia de colores, se ilumina el color aleatorio
-     * @author Daniel Figueroa Vidal
-     */
-    fun realizarSecuencia(){
+
+    private fun cargarRecordInicial() {
+        viewModelScope.launch {
+            val record = historialRecord.cargarRecord()
+            if (record != null) {
+                Datos.record.value = record.maxRonda
+                _recordConFecha.value = record
+            }
+        }
+    }
+
+
+
+    fun comprobarEleccionEnSecuencia(color: Colores, numeroSecuencia: Int): Boolean {
+        return Datos.secuencia.value[numeroSecuencia] == color
+    }
+
+
+    fun realizarSecuencia() {
         viewModelScope.launch {
             Datos.estado.value = Estado.GENERAR_SECUENCIA
-            Log.d("App", "Estado de la secuencia: ${Datos.estado.value}")
+//            Log.d("App", "Estado de la secuencia: ${Datos.estado.value}")
 
-            for(color in Datos.secuencia.value){
+            for(color in Datos.secuencia.value) {
                 Datos.currentColorEncendido.value = color
                 delay(1000)
-                Datos.currentColorEncendido.value = null // Manejo de nulos, si se pone en nulo en la interfaz no se enciende ningun color
+                Datos.currentColorEncendido.value = null
                 delay(1000)
             }
-            Datos.estado.value = Estado.ELECCION_USUARIO // Cuando termina la secuencia se cambia el estado a ELECCION_USUARIO
-            Log.d("App", "Estado de la secuencia: ${Datos.estado.value}")
+            Datos.estado.value = Estado.ELECCION_USUARIO
+//            Log.d("App", "Estado de la secuencia: ${Datos.estado.value}")
         }
     }
 
-    /**
-     * Añade un color aleatorio a la secuencia
-     * @author Daniel Figueroa Vidal
-     */
-    fun añadirColorASecuencia(){
-        var colorAleatorio  = Colores.entries.toTypedArray().random()
+
+    fun añadirColorASecuencia() {
+        val colorAleatorio = Colores.entries.toTypedArray().random()
         Datos.secuencia.value.add(colorAleatorio)
     }
 
-    /**
-     * Inicia el juego, se genera la secuencia y se inicia la secuencia de colores
-     * @author Daniel Figueroa Vidal
-     */
-    fun iniciarJuego(){
+
+    fun iniciarJuego() {
         añadirColorASecuencia()
         realizarSecuencia()
     }
 
-    /**
-     * Comprueba si el color seleccionado por el usuario es el mismo que el de la secuencia
-     * Este es el método que comparten los botones de colores en su onclick
-     * @author Daniel Figueroa Vidal
-     * @param colorSelect Colores
-     */
-    fun colorSeleccionado(colorSelect:Colores){
-        //Comprobamos si la elección del usuario es correcta
-        if(comprobarEleccionEnSecuencia(colorSelect, posicion)){
-            posicion++ // Si es correcta aumentamos la posición
-            if(posicion == Datos.secuencia.value.size) { // Si hemos llegado al final de la secuencia
-                //Se completa una ronda
-                Log.d("App", "Completaste una ronda")
-                Datos.ronda.value++ // Aumentamos la ronda
-                añadirColorASecuencia() // Añadimos un color a la secuencia
-                realizarSecuencia() // Realizamos la visualizacion de la secuencia
-                posicion = 0 // Reiniciamos la posición
+    fun colorSeleccionado(colorSelect: Colores) {
+        if(comprobarEleccionEnSecuencia(colorSelect, posicion)) {
+            posicion++
+            if(posicion == Datos.secuencia.value.size) {
+                //Log.d("App", "Completaste una ronda")
+                Datos.ronda.value++
+                añadirColorASecuencia()
+                realizarSecuencia()
+                posicion = 0
             }
-
-        }else{ // Si el usuario falla la secuencia
-
-            Datos.secuencia.value = mutableListOf() // Reiniciamos la secuencia
+        } else {
+            Datos.secuencia.value = mutableListOf()
+            comprobarRecord()
             Datos.ronda.value = 0
-            comprobarRecord() // Comprobamos si es record, para actualizarlo si hace falta
             posicion = 0
-            Log.d("App", "ERROR")
-            Datos.estado.value = Estado.FINALIZADO //Cambiamos el estado para el correcto manejo de botones
-//            viewModelScope.launch {
-//                ejecutarSonidoError()
-//            }
+            //Log.d("App", "ERROR")
+            Datos.estado.value = Estado.FINALIZADO
         }
-
-
     }
 
-    /**
-     * Volvemos al estado IDLE
-     */
-    fun volverAlIdle(){ // Volvemos al estado IDLE
+
+    fun volverAlIdle() {
         Datos.estado.value = Estado.IDLE
     }
 
-    /**
-     * Comprueba si el record es mayor que la ronda actual
-     * @author Daniel Figueroa Vidal
-     */
-    fun comprobarRecord(){
-        if(Datos.ronda.value > Datos.record.value)
+    fun comprobarRecord() {
+        if(Datos.ronda.value > Datos.record.value) {
             Datos.record.value = Datos.ronda.value
+            val nuevoRecord = Record.crearDesdeRonda(Datos.ronda.value)
+            _recordConFecha.value = nuevoRecord  // ¡Actualiza el estado!
+            historialRecord.guardarRecord(nuevoRecord)
+        }
     }
-
-
-
-
-
-
-
 }
-
-
-
-
-
-
-
-

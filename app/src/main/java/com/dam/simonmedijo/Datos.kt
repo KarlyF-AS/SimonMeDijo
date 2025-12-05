@@ -4,6 +4,9 @@ import android.content.Context
 import android.media.SoundPool
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 object Datos {
@@ -27,13 +30,6 @@ object Datos {
 
 }
 
-/**
- *  Estados del juego, para el manejo de botones y texto del panel
- *  @author Daniel Figueroa Vidal
- *  @param botoneraIsActive Boolean
- *  @param botonStartIsActive Boolean
- *  @param textoPanel String
- */
 
 enum class Estado(val botoneraIsActive: Boolean, val botonStartIsActive: Boolean, val textoPanel: String) {
         IDLE( botoneraIsActive = false, botonStartIsActive = true, textoPanel = "Presiona Start para comenzar" ),
@@ -42,12 +38,7 @@ enum class Estado(val botoneraIsActive: Boolean, val botonStartIsActive: Boolean
         FINALIZADO( botoneraIsActive = false, botonStartIsActive = true, textoPanel = "Fallaste, vuelve a intentarlo")
     }
 
-    /**
-     * Colores utilizados
-     * @author Daniel Figueroa Vidal
-     * @param color Color
-     * @param txt String
-     */
+
     enum class Colores(val color: Color, val txt: String) {
         CLASE_ROJO(color = Color.Red, txt = "Rojo"),
         CLASE_VERDE(color = Color.Green, txt = "Verde"),
@@ -56,9 +47,27 @@ enum class Estado(val botoneraIsActive: Boolean, val botonStartIsActive: Boolean
     }
 
 /**
- * Inicializa los sonidos del juego
- * @author Daniel Figueroa Vidal
+ * Record
  */
+data class Record(
+    val maxRonda: Int = 0,
+    val fechaTexto: String = "",
+    val tiempoMS: Long = 0
+) {
+    companion object {
+        // Esto crea un Record con la fecha ACTUAL
+        fun crearDesdeRonda(rondaActual: Int): Record {
+            val ahora = Date()
+            val formato = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+            return Record(
+                maxRonda = rondaActual,
+                fechaTexto = formato.format(ahora),
+                tiempoMS = ahora.time
+            )
+        }
+    }
+}
+
 fun inicializarSonidos(context: Context) { // El contexto es necesario para cargar los sonidos
     Datos.soundPool = SoundPool.Builder()
         .setMaxStreams(8) // Aumentado para manejar más sonidos simultáneos
