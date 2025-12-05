@@ -12,16 +12,27 @@ import androidx.compose.runtime.State
 class MyVM : ViewModel() {
 
     var posicion = 0
+
+    /** Manejador del historial donde se guarda y carga el récord persistente. */
     private lateinit var historialRecord: HistorialRecord
+
+    /** Último récord guardado, incluyendo su fecha. */
     private val _recordConFecha = mutableStateOf<Record?>(null)
     val recordConFecha: State<Record?> get() = _recordConFecha
 
+    /**
+     * Inicializa el historial de récords usando SharedPreferences.
+     * Debe llamarse al iniciar la actividad.
+     */
     fun inicializarHistorial(context: Context) {
         historialRecord = RecordSharedP(context)
         cargarRecordInicial()
     }
 
-
+    /**
+     * Carga el récord almacenado al abrir la app y lo aplica
+     * al estado global y al estado observable del ViewModel.
+     */
     private fun cargarRecordInicial() {
         viewModelScope.launch {
             val record = historialRecord.cargarRecord()
@@ -92,6 +103,11 @@ class MyVM : ViewModel() {
         Datos.estado.value = Estado.IDLE
     }
 
+    /**
+     * Comprueba si la ronda actual supera al récord anterior.
+     * Si es así, crea un nuevo récord con la fecha del sistema,
+     * actualiza el estado y lo guarda de forma persistente.
+     */
     fun comprobarRecord() {
         if(Datos.ronda.value > Datos.record.value) {
             Datos.record.value = Datos.ronda.value

@@ -19,6 +19,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         inicializarSonidos(this)
+
+        /**
+         * Carga el historial de récords guardado en almacenamiento local
+         * para que el ViewModel pueda mostrar y actualizar el mejor récord.
+         */
         viewModel.inicializarHistorial(this)
         enableEdgeToEdge()
         setContent {

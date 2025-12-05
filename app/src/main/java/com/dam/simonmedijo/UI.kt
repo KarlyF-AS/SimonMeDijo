@@ -43,6 +43,7 @@ fun Botonera(myVM: MyVM) {
     val estado = Datos.estado.collectAsState().value
     val rondaActual = Datos.ronda.collectAsState().value
     val recordActual = Datos.record.collectAsState().value
+    /** Record completo incluyendo fecha */
     val recordConFecha by myVM.recordConFecha
 
     val botoneraIsActive = estado.botoneraIsActive
@@ -100,6 +101,7 @@ fun Botonera(myVM: MyVM) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
+                    // Contador de ronda
                     text = "Ronda actual",
                     fontSize = 14.sp,
                     color = Color.DarkGray
@@ -120,6 +122,7 @@ fun Botonera(myVM: MyVM) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
+                    // Contador de récord
                     text = "Mejor récord",
                     fontSize = 14.sp,
                     color = Color.DarkGray
@@ -280,6 +283,10 @@ fun Botonera(myVM: MyVM) {
     }
 }
 
+/**
+ * Reproduce el sonido correspondiente al color o al error.
+ * No está directamente relacionado con récord.
+ */
 @Composable
 fun ejecutarSonido(color: Colores) {
     LaunchedEffect(color) {
