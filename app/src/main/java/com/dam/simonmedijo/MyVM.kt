@@ -2,16 +2,19 @@ package com.dam.simonmedijo
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.State
 
 class MyVM : ViewModel() {
 
     var posicion = 0
     private lateinit var historialRecord: HistorialRecord
-
+    private val _recordConFecha = mutableStateOf<Record?>(null)
+    val recordConFecha: State<Record?> get() = _recordConFecha
 
     fun inicializarHistorial(context: Context) {
         historialRecord = RecordSharedP(context)
@@ -24,9 +27,11 @@ class MyVM : ViewModel() {
             val record = historialRecord.cargarRecord()
             if (record != null) {
                 Datos.record.value = record.maxRonda
+                _recordConFecha.value = record
             }
         }
     }
+
 
 
     fun comprobarEleccionEnSecuencia(color: Colores, numeroSecuencia: Int): Boolean {
@@ -89,13 +94,9 @@ class MyVM : ViewModel() {
 
     fun comprobarRecord() {
         if(Datos.ronda.value > Datos.record.value) {
-            // Actualizo el valor en memoria
             Datos.record.value = Datos.ronda.value
-
-            // Creo un nuevo Record con fecha actual
             val nuevoRecord = Record.crearDesdeRonda(Datos.ronda.value)
-
-            // Lo guardo en SharedPreferences
+            _recordConFecha.value = nuevoRecord  // ¡Actualiza el estado!
             historialRecord.guardarRecord(nuevoRecord)
         }
     }
