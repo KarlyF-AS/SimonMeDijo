@@ -3,7 +3,7 @@ package com.dam.simonmedijo
 import android.content.Context
 
 interface  HistorialRecord{
-    fun guardasRecord(record: Record)
+    fun guardarRecord(record: Record)
     fun cargarRecord(): Record?
 }
 
@@ -13,7 +13,7 @@ class RecordSharedP (context: Context) : HistorialRecord {
         Context.MODE_PRIVATE
     )
 
-    override fun guardasRecord(record: Record) {
+    override fun guardarRecord(record: Record) {
         sharedPrefs.edit().apply {
             putInt("max_ronda", record.maxRonda)
             putString("fecha_texto", record.fechaTexto)
@@ -22,7 +22,15 @@ class RecordSharedP (context: Context) : HistorialRecord {
         }
     }
 
+
     override fun cargarRecord(): Record? {
-        TODO("Not yet implemented")
+        val maxRonda = sharedPrefs.getInt("max_ronda", -1)
+        if (maxRonda == -1) return null
+
+            return Record(
+                maxRonda = maxRonda,
+                fechaTexto = sharedPrefs.getString("fecha_texto", "") ?: "",
+                tiempoMS = sharedPrefs.getLong("tiempoMS", 0)
+            )
+        }
     }
-}
