@@ -5,6 +5,7 @@ import android.content.Context
 interface  HistorialRecord{
     fun guardarRecord(record: Record)
     fun cargarRecord(): Record?
+    fun obtenerRondaRecord(): Int
 }
 
 class RecordSharedP (context: Context) : HistorialRecord {
@@ -33,4 +34,7 @@ class RecordSharedP (context: Context) : HistorialRecord {
                 tiempoMS = sharedPrefs.getLong("tiempoMS", 0)
             )
         }
+    override fun obtenerRondaRecord(): Int {
+        return sharedPrefs.getInt("max_ronda", 0)
     }
+}
