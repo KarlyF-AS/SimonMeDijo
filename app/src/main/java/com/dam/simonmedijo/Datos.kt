@@ -52,7 +52,7 @@ enum class Estado(val botoneraIsActive: Boolean, val botonStartIsActive: Boolean
 data class Record(
     val maxRonda: Int = 0,
     val fechaTexto: String = "",
-    val timestamp: Long = 0
+    val tiempoMS: Long = 0
 ) {
     companion object {
         // Esto crea un Record con la fecha ACTUAL
@@ -62,7 +62,7 @@ data class Record(
             return Record(
                 maxRonda = rondaActual,
                 fechaTexto = formato.format(ahora),
-                timestamp = ahora.time
+                tiempoMS = ahora.time
             )
         }
     }
