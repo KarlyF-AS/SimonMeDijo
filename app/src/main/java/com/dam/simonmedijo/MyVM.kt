@@ -42,7 +42,7 @@ class MyVM : ViewModel() {
     fun realizarSecuencia() {
         viewModelScope.launch {
             Datos.estado.value = Estado.GENERAR_SECUENCIA
-            Log.d("App", "Estado de la secuencia: ${Datos.estado.value}")
+//            Log.d("App", "Estado de la secuencia: ${Datos.estado.value}")
 
             for(color in Datos.secuencia.value) {
                 Datos.currentColorEncendido.value = color
@@ -51,7 +51,7 @@ class MyVM : ViewModel() {
                 delay(1000)
             }
             Datos.estado.value = Estado.ELECCION_USUARIO
-            Log.d("App", "Estado de la secuencia: ${Datos.estado.value}")
+//            Log.d("App", "Estado de la secuencia: ${Datos.estado.value}")
         }
     }
 
@@ -71,7 +71,7 @@ class MyVM : ViewModel() {
         if(comprobarEleccionEnSecuencia(colorSelect, posicion)) {
             posicion++
             if(posicion == Datos.secuencia.value.size) {
-                Log.d("App", "Completaste una ronda")
+                //Log.d("App", "Completaste una ronda")
                 Datos.ronda.value++
                 añadirColorASecuencia()
                 realizarSecuencia()
@@ -82,7 +82,7 @@ class MyVM : ViewModel() {
             comprobarRecord()
             Datos.ronda.value = 0
             posicion = 0
-            Log.d("App", "ERROR")
+            //Log.d("App", "ERROR")
             Datos.estado.value = Estado.FINALIZADO
         }
     }
