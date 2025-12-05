@@ -47,7 +47,8 @@ enum class Estado(val botoneraIsActive: Boolean, val botonStartIsActive: Boolean
     }
 
 /**
- * Record
+ * Representa el récord del jugador: la ronda máxima alcanzada, la fecha
+ * y el tiempo en milisegundos cuando se registró.
  */
 data class Record(
     val maxRonda: Int = 0,
@@ -55,7 +56,12 @@ data class Record(
     val tiempoMS: Long = 0
 ) {
     companion object {
-        // Esto crea un Record con la fecha ACTUAL
+        /**
+         * Crea un nuevo récord usando la ronda actual y la fecha del sistema.
+         *
+         * @param rondaActual Ronda alcanzada por el jugador.
+         * @return Un objeto Record con ronda, fecha formateada y marca temporal.
+         */
         fun crearDesdeRonda(rondaActual: Int): Record {
             val ahora = Date()
             val formato = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
