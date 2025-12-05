@@ -43,16 +43,7 @@ fun Botonera(myVM: MyVM) {
     val estado = Datos.estado.collectAsState().value
     val rondaActual = Datos.ronda.collectAsState().value
     val recordActual = Datos.record.collectAsState().value
-
-    // Estado para el record con fecha
-    var recordConFecha by remember { mutableStateOf<Record?>(null) }
-
-    // Cargar el record con fecha cuando la UI se monte
-    LaunchedEffect(Unit) {
-        // TODO: Obtener el record del ViewModel
-        // Por ahora, cargamos directamente (esto cambiará)
-        // recordConFecha = myVM.obtenerRecordConFecha()
-    }
+    val recordConFecha by myVM.recordConFecha
 
     val botoneraIsActive = estado.botoneraIsActive
     val botonStartIsActive = estado.botonStartIsActive
