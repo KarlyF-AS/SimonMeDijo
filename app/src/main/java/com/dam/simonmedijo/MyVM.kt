@@ -1,27 +1,28 @@
 package com.dam.simonmedijo
 
 import android.content.Context
-import android.util.Log
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
+import com.dam.simonmedijo.data.RecordRoom
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.State
 
 class MyVM : ViewModel() {
 
     var posicion = 0
-    private lateinit var historialRecord: HistorialRecord
+
+    private lateinit var historialRecord: RecordRoom
     private val _recordConFecha = mutableStateOf<Record?>(null)
     val recordConFecha: State<Record?> get() = _recordConFecha
 
+    /** Inicializa Room para manejar récords */
     fun inicializarHistorial(context: Context) {
-        historialRecord = RecordSharedP(context)
+        historialRecord = RecordRoom(context)
         cargarRecordInicial()
     }
 
-
+    /** Carga el récord guardado al iniciar la app */
     private fun cargarRecordInicial() {
         viewModelScope.launch {
             val record = historialRecord.cargarRecord()
@@ -32,46 +33,43 @@ class MyVM : ViewModel() {
         }
     }
 
-
-
+    /** Comprueba si la elección del usuario es correcta */
     fun comprobarEleccionEnSecuencia(color: Colores, numeroSecuencia: Int): Boolean {
         return Datos.secuencia.value[numeroSecuencia] == color
     }
 
-
+    /** Muestra la secuencia de colores */
     fun realizarSecuencia() {
         viewModelScope.launch {
             Datos.estado.value = Estado.GENERAR_SECUENCIA
-//            Log.d("App", "Estado de la secuencia: ${Datos.estado.value}")
 
             for(color in Datos.secuencia.value) {
                 Datos.currentColorEncendido.value = color
-                delay(1000)
+                kotlinx.coroutines.delay(1000)
                 Datos.currentColorEncendido.value = null
-                delay(1000)
+                kotlinx.coroutines.delay(1000)
             }
             Datos.estado.value = Estado.ELECCION_USUARIO
-//            Log.d("App", "Estado de la secuencia: ${Datos.estado.value}")
         }
     }
 
-
+    /** Añade un color aleatorio a la secuencia */
     fun añadirColorASecuencia() {
         val colorAleatorio = Colores.entries.toTypedArray().random()
         Datos.secuencia.value.add(colorAleatorio)
     }
 
-
+    /** Inicia el juego */
     fun iniciarJuego() {
         añadirColorASecuencia()
         realizarSecuencia()
     }
 
+    /** Lógica cuando el usuario selecciona un color */
     fun colorSeleccionado(colorSelect: Colores) {
-        if(comprobarEleccionEnSecuencia(colorSelect, posicion)) {
+        if (comprobarEleccionEnSecuencia(colorSelect, posicion)) {
             posicion++
-            if(posicion == Datos.secuencia.value.size) {
-                //Log.d("App", "Completaste una ronda")
+            if (posicion == Datos.secuencia.value.size) {
                 Datos.ronda.value++
                 añadirColorASecuencia()
                 realizarSecuencia()
@@ -82,22 +80,26 @@ class MyVM : ViewModel() {
             comprobarRecord()
             Datos.ronda.value = 0
             posicion = 0
-            //Log.d("App", "ERROR")
             Datos.estado.value = Estado.FINALIZADO
         }
     }
 
-
+    /** Vuelve al estado inicial IDLE */
     fun volverAlIdle() {
         Datos.estado.value = Estado.IDLE
     }
 
+    /** Comprueba si la ronda actual supera el récord y lo guarda usando Room */
     fun comprobarRecord() {
-        if(Datos.ronda.value > Datos.record.value) {
+        if (Datos.ronda.value > Datos.record.value) {
             Datos.record.value = Datos.ronda.value
             val nuevoRecord = Record.crearDesdeRonda(Datos.ronda.value)
-            _recordConFecha.value = nuevoRecord  // ¡Actualiza el estado!
-            historialRecord.guardarRecord(nuevoRecord)
+            _recordConFecha.value = nuevoRecord
+
+            // Guardar récord en Room de forma segura
+            viewModelScope.launch {
+                historialRecord.guardarRecord(nuevoRecord)
+            }
         }
     }
 }
