@@ -1,0 +1,215 @@
+Plan de Integracion MongoDB con Multi-Backend
+
+Objetivo General
+================
+Integrar MongoDB como backend remoto en SimonMeDijo, manteniendo compatibilidad con:
+- SharedPreferences (preferencias locales)
+- SQLite/Room (persistencia local SQL)
+- MongoDB Realm (persistencia local NoSQL)
+- MongoDB Atlas (persistencia remota)
+
+Requisitos
+==========
+REQ-001: Mantener codigo existente de SharedPreferences sin cambios
+REQ-002: Mantener codigo existente de SQLite/Room sin cambios
+REQ-003: Agregar nueva capa de MongoDB sin romper arquitectura
+REQ-004: Sincronizar records entre dispositivo y MongoDB
+REQ-005: Permitir sincronizacion offline-first
+REQ-006: No requerir conexion a internet para jugar
+REQ-007: Soportar multiples usuarios en MongoDB
+REQ-008: Encriptar datos sensibles en transito y en reposo
+
+Arquitectura
+============
+
+Capa Actual:
+  UI (Jetpack Compose)
+    ↓
+  ViewModel (MyVM)
+    ↓
+  Datos (Singleton)
+    ↓
+  HistorialRecord (Interfaz)
+    ↓
+  RecordRoom / RecordRealmImpl (Implementaciones)
+    ↓
+  Room / Realm (BD Local)
+
+Nueva Arquitectura:
+  UI (Jetpack Compose)
+    ↓
+  ViewModel (MyVM)
+    ↓
+  Datos (Singleton)
+    ↓
+  RecordsManager (Gestor Central) ← NUEVO
+    ↓
+  ┌─────────────┬─────────────┬─────────────┐
+  ↓             ↓             ↓
+  Preferences   Local DB      Remote DB    ← 3 backends
+  (SP)          (Room/Realm)  (MongoDB)
+
+Fases de Implementacion
+=======================
+
+FASE 1: Planificacion y Documentacion (3 Issues)
+  Issue #1: Crear estructura de carpetas y archivos
+  Issue #2: Documentar arquitectura y patrones
+  Issue #3: Crear modelos de datos compartidos
+
+FASE 2: Backend Local (2 Issues)
+  Issue #4: Refactorizar acceso a SharedPreferences
+  Issue #5: Refactorizar acceso a SQLite/Room
+
+FASE 3: Backend Remoto (3 Issues)
+  Issue #6: Configurar MongoDB Atlas y conexion
+  Issue #7: Implementar MongoDB Repository
+  Issue #8: Crear sincronizacion offline-first
+
+FASE 4: Gestor Central (2 Issues)
+  Issue #9: Implementar RecordsManager
+  Issue #10: Integrar RecordsManager con ViewModel
+
+FASE 5: Testing (2 Issues)
+  Issue #11: Tests unitarios para cada backend
+  Issue #12: Tests de sincronizacion
+
+FASE 6: UI y Migracion (2 Issues)
+  Issue #13: Actualizar UI para mostrar estado sync
+  Issue #14: Crear herramienta de migracion de datos
+
+FASE 7: Documentacion Final (1 Issue)
+  Issue #15: Documentacion completa de implementacion
+
+Cambios de Directorio
+=====================
+
+Nuevo:
+  app/src/main/java/com/dam/simonmedijo/
+    records/
+      ├── core/
+      │   ├── Record.kt (modelo compartido)
+      │   ├── RecordsManager.kt (gestor central)
+      │   └── SyncState.kt (estados sincronizacion)
+      │
+      ├── local/
+      │   ├── preferences/
+      │   │   ├── PreferencesRepository.kt
+      │   │   └── PreferencesImpl.kt
+      │   │
+      │   └── database/
+      │       ├── RoomRepository.kt
+      │       ├── RealmRepository.kt
+      │       └── LocalDbFactory.kt
+      │
+      └── remote/
+          ├── mongodb/
+          │   ├── MongoDBRepository.kt
+          │   ├── MongoDBConfig.kt
+          │   └── MongoDBSync.kt
+          │
+          └── api/
+              ├── RecordsApi.kt
+              └── ApiClient.kt
+
+Modificar:
+  app/build.gradle.kts (agregar MongoDB SDK)
+  app/src/main/AndroidManifest.xml (permisos internet)
+  MyVM.kt (usar RecordsManager)
+  Readme.md (documentar arquitectura)
+
+Dependencias a Agregar
+=======================
+
+MongoDB:
+  io.realm:realm-android-sdk:10.15.0 (Realm Cloud)
+  org.mongodb:mongo-kotlin-driver:4.11.0 (Driver nativo)
+  com.mongodb.stitch:mongo-stitch-android-sdk:4.11.0 (Stitch alternativo)
+
+Networking:
+  com.squareup.retrofit2:retrofit:2.9.0
+  com.squareup.okhttp3:okhttp:4.11.0
+  com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0
+
+Serialization:
+  org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1
+
+Sync/Offline:
+  androidx.room:room-runtime:2.8.4 (ya existe)
+  androidx.work:work-runtime-ktx:2.8.1 (para sync en background)
+
+Timeline
+========
+
+FASE 1: 1-2 horas
+FASE 2: 2-3 horas
+FASE 3: 3-4 horas
+FASE 4: 1-2 horas
+FASE 5: 2-3 horas
+FASE 6: 2-3 horas
+FASE 7: 1 hora
+
+Total Estimado: 12-18 horas
+
+Ramas Git
+=========
+
+Rama principal: feature/multi-backend-records
+
+Ramas secundarias (una por FASE):
+  feature/records-structure (FASE 1)
+  feature/records-local-backend (FASE 2)
+  feature/records-remote-backend (FASE 3)
+  feature/records-manager (FASE 4)
+  feature/records-testing (FASE 5)
+  feature/records-ui-migration (FASE 6)
+
+Merge sequence:
+  feature/records-structure → develop
+  feature/records-local-backend → develop
+  feature/records-remote-backend → develop
+  feature/records-manager → develop
+  feature/records-testing → develop
+  feature/records-ui-migration → develop
+
+  Luego taggear como v1.2
+
+Consideraciones
+===============
+
+1. Seguridad:
+   - Nunca guardar credenciales en codigo
+   - Usar variables de entorno para configuracion
+   - Encriptar datos antes de enviar a MongoDB
+   - Validar autenticacion en cada request
+
+2. Performance:
+   - Cachear datos locales
+   - Sincronizar en background
+   - Usar Worker de AndroidX
+   - Implementar paginacion en listados
+
+3. Offline-First:
+   - Siempre leer de local primero
+   - Queue de cambios pendientes
+   - Sincronizar cuando hay conexion
+   - Resolver conflictos automaticamente
+
+4. Versionado:
+   - Versiones: MAJOR.MINOR.PATCH
+   - v1.1 actual (Realm local)
+   - v1.2 objetivo (Multi-backend)
+   - v2.0 futuro (App completa)
+
+Éxito se Define Por
+===================
+
+✓ Mantener 100% compatibilidad con codigo existente
+✓ Implementar 3 backends simultaneos sin conflictos
+✓ Sincronizacion bidireccional funcional
+✓ Tests con +80% coverage
+✓ Documentacion clara para agentes IA
+✓ Zero breaking changes en API publica
+✓ Performance: <500ms en operaciones CRUD
+✓ Soporte offline funcional
+

@@ -1,0 +1,837 @@
+ISSUE #1: Crear estructura de carpetas y archivos base
+
+Titulo
+======
+Setup: Crear estructura de directorios para arquitectura multi-backend
+
+Descripcion
+===========
+Crear la estructura de carpetas y archivos base necesaria para la integracion
+de MongoDB manteniendo compatibilidad con SharedPreferences y SQLite.
+
+Tareas
+======
+- Crear directorio: app/src/main/java/com/dam/simonmedijo/records/
+- Crear subdirectorio: app/src/main/java/com/dam/simonmedijo/records/core/
+- Crear subdirectorio: app/src/main/java/com/dam/simonmedijo/records/local/
+- Crear subdirectorio: app/src/main/java/com/dam/simonmedijo/records/local/preferences/
+- Crear subdirectorio: app/src/main/java/com/dam/simonmedijo/records/local/database/
+- Crear subdirectorio: app/src/main/java/com/dam/simonmedijo/records/remote/
+- Crear subdirectorio: app/src/main/java/com/dam/simonmedijo/records/remote/mongodb/
+- Crear subdirectorio: app/src/main/java/com/dam/simonmedijo/records/remote/api/
+
+Aceptacion
+==========
+- Todos los directorios existen
+- No hay archivos .kt aun (solo estructura)
+- Estructura coincide con MASTER_PLAN.txt
+
+Rama
+====
+feature/records-structure
+
+---
+
+ISSUE #2: Documentar arquitectura y patrones
+
+Titulo
+======
+Docs: Documentacion de arquitectura multi-backend y patrones
+
+Descripcion
+===========
+Crear documentacion clara sobre la arquitectura que soporta 3 backends simultaneos
+y los patrones de diseño utilizados.
+
+Tareas
+======
+- Crear archivo: docs/ARCHITECTURE.md
+- Documentar patron Repository
+- Documentar patron Manager (gestor central)
+- Documentar flujo de datos
+- Documentar sincronizacion offline-first
+- Crear diagrama ASCII de arquitectura
+- Documentar decisiones de diseño
+
+Contenido Minimo
+================
+- Porque 3 backends
+- Como interactuan entre si
+- Responsabilidades de cada uno
+- Flujo cuando hay conexion vs sin conexion
+- Como agregar nuevo backend en futuro
+
+Aceptacion
+==========
+- docs/ARCHITECTURE.md existe
+- Minimo 300 lineas
+- Diagramas incluidos
+- Clara para desarrolladores nuevos
+
+Rama
+====
+feature/records-structure
+
+---
+
+ISSUE #3: Crear modelos de datos compartidos
+
+Titulo
+======
+Core: Modelos de datos compartidos entre backends
+
+Descripcion
+===========
+Crear los modelos de datos (data classes) que seran compartidos por
+todos los backends para evitar duplicacion.
+
+Tareas
+======
+- Crear app/src/main/java/com/dam/simonmedijo/records/core/Record.kt
+  - Propiedades: id, userId, maxRonda, fechaTexto, tiempoMS, timestamp
+  - Metodos: equals, hashCode, toString
+  - Companion object: factory methods
+
+- Crear app/src/main/java/com/dam/simonmedijo/records/core/SyncState.kt
+  - Enum: SYNCED, PENDING, FAILED, SYNCING
+  - Propiedades: lastSyncTime, error
+
+- Crear app/src/main/java/com/dam/simonmedijo/records/core/RecordWithSync.kt
+  - Combina Record + SyncState
+  - Metodo para saber si esta sincronizado
+
+Detalles Tecnico
+================
+- Usar data class en Kotlin
+- Serializable para persistencia
+- Compatibilidad con Room, Realm y MongoDB
+- Sin dependencias de frameworks
+
+Aceptacion
+==========
+- 3 archivos creados
+- Todas las clases documentadas con KDoc
+- Pueden importarse sin errores
+- Tests basicos pasan
+
+Rama
+====
+feature/records-structure
+
+---
+
+ISSUE #4: Refactorizar acceso a SharedPreferences
+
+Titulo
+======
+Local: Implementar PreferencesRepository para SharedPreferences
+
+Descripcion
+===========
+Crear una capa de abstraccion para SharedPreferences siguiendo el patron
+Repository, permitiendo que el rest del codigo no acceda directamente.
+
+Tareas
+======
+- Crear interface: app/src/main/java/com/dam/simonmedijo/records/local/preferences/PreferencesRepository.kt
+  - Metodo: saveRecord(record: Record)
+  - Metodo: getRecord(): Record?
+  - Metodo: getMaxRonda(): Int
+  - Metodo: deleteRecord()
+
+- Crear implementacion: app/src/main/java/com/dam/simonmedijo/records/local/preferences/PreferencesImpl.kt
+  - Usar SharedPreferences existente
+  - Guardar como JSON
+  - Documentar formato
+
+- Refactorizar codigo existente que usa SharedPreferences directamente
+  - Encontrar todas las referencias
+  - Reemplazar por PreferencesRepository
+  - Verificar que sigue funcionando igual
+
+Consideraciones
+===============
+- No romper funcionalidad existente
+- Mantener compatibilidad con datos guardados
+- Permitir migracion gradual
+
+Aceptacion
+==========
+- Interface y implementacion creadas
+- Tests de lectura/escritura pasan
+- Codigo existente refactorizado
+- No hay breaking changes
+
+Rama
+====
+feature/records-local-backend
+
+---
+
+ISSUE #5: Refactorizar acceso a SQLite/Room
+
+Titulo
+======
+Local: Implementar RoomRepository para SQLite
+
+Descripcion
+===========
+Crear una capa de abstraccion para Room siguiendo patron Repository,
+consolidando acceso a base de datos SQLite.
+
+Tareas
+======
+- Crear interface: app/src/main/java/com/dam/simonmedijo/records/local/database/RoomRepository.kt
+  - Metodos: saveRecord, getRecord, getMaxRonda, deleteRecord
+  - Metodos: getAllRecords, updateRecord, deleteAll
+
+- Crear implementacion: app/src/main/java/com/dam/simonmedijo/records/local/database/RoomRepositoryImpl.kt
+  - Usar AppDatabase existente
+  - Usar RecordDAO existente
+  - Manejar corrutinas correctamente
+
+- Refactorizar MyVM y otras clases que usan Room directamente
+  - Reemplazar por RoomRepository
+  - Mantener logica igual
+  - Agregar tests
+
+- Crear factory si necesario:
+  app/src/main/java/com/dam/simonmedijo/records/local/database/LocalDbFactory.kt
+  - Permite elegir entre Room o Realm
+  - Encapsula creacion de implementacion
+
+Detalles Tecnico
+================
+- Usar suspend functions para async
+- Manejo de excepciones
+- Logging de operaciones
+- Documentacion KDoc
+
+Aceptacion
+==========
+- Interface y implementacion creadas
+- Codigo existente funciona sin cambios visibles
+- Tests de CRUD pasan
+- LocalDbFactory selecciona correctamente
+
+Rama
+====
+feature/records-local-backend
+
+---
+
+ISSUE #6: Configurar MongoDB Atlas y conexion
+
+Titulo
+======
+Remote: Configurar MongoDB Atlas y credenciales
+
+Descripcion
+===========
+Preparar la conexion a MongoDB Atlas remoto, con manejo seguro de
+credenciales y configuracion por entorno.
+
+Tareas
+======
+- Crear cuenta en MongoDB Atlas (si no existe)
+- Crear base de datos: simonmedijo_prod
+- Crear coleccion: records
+- Crear usuario de aplicacion con permisos limitados
+
+- Crear archivo: app/src/main/java/com/dam/simonmedijo/records/remote/mongodb/MongoDBConfig.kt
+  - Configuracion (URL, timeout, retry policy)
+  - NO guardar credenciales directamente
+  - Usar variables de entorno
+
+- Crear archivo: local.properties con:
+  MONGODB_URI=mongodb+srv://...
+  MONGODB_API_KEY=...
+  (NO commitear a git)
+
+- Documentar en docs/MONGODB_SETUP.md:
+  - Pasos para crear cuenta
+  - Pasos para crear cluster
+  - Como obtener credenciales
+  - Como configurar en desarrollo/produccion
+
+- Agregar a gitignore:
+  local.properties
+  *.env
+  credentials.json
+
+Seguridad
+=========
+- Nunca commitear credenciales
+- Usar BuildConfig para variables
+- Implementar validacion de certificados SSL
+- Rotar API keys regularmente
+
+Aceptacion
+==========
+- Cluster MongoDB Atlas existe
+- MongoDBConfig.kt implementado
+- Documentacion en docs/
+- local.properties en gitignore
+- Credenciales no estan en git
+
+Rama
+====
+feature/records-remote-backend
+
+---
+
+ISSUE #7: Implementar MongoDB Repository
+
+Titulo
+======
+Remote: Crear MongoDBRepository para operaciones CRUD
+
+Descripcion
+===========
+Implementar la capa de acceso a MongoDB remoto siguiendo patron Repository.
+
+Tareas
+======
+- Crear interface: app/src/main/java/com/dam/simonmedijo/records/remote/mongodb/RemoteRepository.kt
+  - Metodos: saveRecord, getRecord, getMaxRonda, deleteRecord
+  - Metodo: getAllRecords(userId)
+  - Manejo de errores de conexion
+
+- Crear implementacion: app/src/main/java/com/dam/simonmedijo/records/remote/mongodb/MongoDBRepository.kt
+  - Conectar a MongoDB Atlas
+  - CRUD operations
+  - Manejo de autenticacion
+  - Retry en fallos
+
+- Crear app/src/main/java/com/dam/simonmedijo/records/remote/api/RecordsApi.kt
+  - Interfaz Retrofit para HTTP
+  - Endpoints: POST/GET/PUT/DELETE records
+  - Autenticacion Bearer token
+
+- Crear app/src/main/java/com/dam/simonmedijo/records/remote/api/ApiClient.kt
+  - Singleton para Retrofit
+  - Interceptores para logging
+  - Manejo de timeouts
+
+Consideraciones
+===============
+- Manejar "no hay conexion" gracefully
+- Cachear respuestas localmente
+- No bloquear UI en operaciones remotas
+- Implementar retry automático
+- Logging de requests/responses
+
+Aceptacion
+==========
+- Interfaces implementadas
+- MongoDBRepository conecta a Atlas
+- RecordsApi define endpoints correctos
+- ApiClient configura Retrofit
+- Tests de conectividad pasan
+- Manejo de errores robusto
+
+Rama
+====
+feature/records-remote-backend
+
+---
+
+ISSUE #8: Crear sincronizacion offline-first
+
+Titulo
+======
+Remote: Implementar sincronizacion offline-first con MongoDB
+
+Descripcion
+===========
+Crear sistema que permite jugar sin internet y sincronizar cambios cuando
+conexion este disponible.
+
+Tareas
+======
+- Crear app/src/main/java/com/dam/simonmedijo/records/remote/mongodb/MongoDBSync.kt
+  - Logica de sincronizacion bidireccional
+  - Manejo de conflictos
+  - Queue de cambios pendientes
+  - Resolucion automatica de conflictos
+
+- Agregar campo 'synced' a Record model
+  - False cuando se crea localmente
+  - True cuando sincroniza con MongoDB
+
+- Crear WorkManager job:
+  app/src/main/java/com/dam/simonmedijo/records/remote/mongodb/SyncWorker.kt
+  - Ejecuta cada X minutos
+  - Sincroniza cambios pendientes
+  - Maneja fallos gracefully
+  - Respetar battery/data saver
+
+- Actualizar build.gradle.kts:
+  - Agregar androidx.work:work-runtime-ktx
+
+- Documentar en docs/SYNC_STRATEGY.md:
+  - Como funciona sincronizacion
+  - Estrategia de resolucion de conflictos
+  - Como ver estado de sync
+  - Como forzar sincronizacion manual
+
+Logica de Conflictos
+====================
+- Si cambio local y remoto: usar timestamp mas reciente
+- Si borrado local pero existe remoto: preguntar usuario
+- Si error en sync: reintentar con backoff exponencial
+
+Aceptacion
+==========
+- MongoDBSync.kt implementado
+- SyncWorker registrado en manifest
+- Cambios se guardan sin conexion
+- Se sincronizan cuando hay conexion
+- Conflictos se resuelven automaticamente
+- Tests de sync pasan
+
+Rama
+====
+feature/records-remote-backend
+
+---
+
+ISSUE #9: Implementar RecordsManager (Gestor Central)
+
+Titulo
+======
+Core: Crear RecordsManager que coordina todos los backends
+
+Descripcion
+===========
+Implementar el gestor central que coordina acceso a SharedPreferences,
+SQLite y MongoDB como una sola abstraccion.
+
+Tareas
+======
+- Crear app/src/main/java/com/dam/simonmedijo/records/core/RecordsManager.kt
+  - Recibe 3 repositories (prefs, local db, remote)
+  - Expone interface publica simple
+  - Maneja logica de distribucion entre backends
+  - Thread-safe
+
+- Metodos principales:
+  - saveRecord(record) → guarda en todos simultáneamente
+  - getRecord() → lee primero local, si no hay remoto
+  - getMaxRonda() → desde local
+  - sync() → sincroniza con MongoDB
+  - getStatus() → retorna SyncStatus actual
+
+- Estrategia de lectura/escritura:
+  - WRITE: simultaneo a los 3 (paralelo si es posible)
+  - READ: local primero, si no hay→remoto
+  - SYNC: background, no bloquea
+
+- Crear app/src/main/java/com/dam/simonmedijo/records/core/RecordsManagerFactory.kt
+  - Factory method para crear RecordsManager
+  - Configurable por ambiente
+  - Inyectable en ViewModel
+
+Detalles Arquitecto
+===================
+- Usar corrutinas para operaciones async
+- Coordinar respuestas de multiples sources
+- Cachear resultados apropiadamente
+- Logging detallado para debugging
+
+Aceptacion
+==========
+- RecordsManager.kt implementado
+- RecordsManagerFactory.kt implementado
+- Thread-safety verificado
+- Tests concurrencia pasan
+- Documentacion clara
+
+Rama
+====
+feature/records-manager
+
+---
+
+ISSUE #10: Integrar RecordsManager con ViewModel
+
+Titulo
+======
+Integration: Conectar RecordsManager con MyVM
+
+Descripcion
+===========
+Refactorizar MyVM para usar RecordsManager en lugar de acceder
+directamente a repositories.
+
+Tareas
+======
+- Modificar MyVM.kt:
+  - Reemplazar acceso directo a repositories
+  - Usar RecordsManager
+  - Mantener interface publica igual (no breaking changes)
+  - Agregar observables para SyncStatus
+
+- Actualizar metodos:
+  - comprobarRecord() → usar RecordsManager.saveRecord()
+  - cargarRecordInicial() → usar RecordsManager.getRecord()
+  - inicializarHistorial() → inicializar RecordsManager
+
+- Agregar UI state:
+  - isSyncing: Boolean (estado sincronizacion)
+  - lastSyncTime: Long (ultimo sync exitoso)
+  - syncError: String? (error si hay)
+
+- Actualizar tests:
+  - Mock RecordsManager
+  - Verificar llamadas correctas
+  - Tests de estados de sync
+
+Consideraciones
+===============
+- Mantener logica de juego igual
+- Solo cambiar forma de guardar/leer records
+- No cambiar signature de metodos publicos
+- Backward compatible
+
+Aceptacion
+==========
+- MyVM usa RecordsManager
+- Tests de ViewModel pasan
+- UI compila sin cambios
+- Funcionalidad de juego igual
+- SyncStatus observable funciona
+
+Rama
+====
+feature/records-manager
+
+---
+
+ISSUE #11: Tests unitarios para cada backend
+
+Titulo
+======
+Testing: Crear tests unitarios para cada backend
+
+Descripcion
+===========
+Implementar suite completa de tests para validar cada backend funciona
+independientemente y con RecordsManager.
+
+Tareas
+======
+- Crear app/src/test/java/com/dam/simonmedijo/records/local/
+  - PreferencesRepositoryTest.kt
+  - RoomRepositoryTest.kt
+  - LocalDbFactoryTest.kt
+
+- Crear app/src/test/java/com/dam/simonmedijo/records/remote/
+  - MongoDBRepositoryTest.kt (con mocks)
+  - MongoDBSyncTest.kt
+  - SyncWorkerTest.kt
+
+- Crear app/src/test/java/com/dam/simonmedijo/records/core/
+  - RecordsManagerTest.kt (tests integracion)
+  - RecordsManagerConcurrencyTest.kt
+
+- Tests a incluir por backend:
+  - Guardar un record
+  - Cargar record existente
+  - Cargar cuando no existe
+  - Actualizar record
+  - Borrar record
+  - Error handling
+  - Performance
+
+Metricas
+========
+- Minimo 80% code coverage
+- Todos los casos de error probados
+- Casos edge incluidos
+- Integracion entre backends
+
+Aceptacion
+==========
+- 10+ test files creados
+- Coverage >= 80%
+- Todos tests pasan
+- Documentacion de test cases
+- CI/CD verifica tests
+
+Rama
+====
+feature/records-testing
+
+---
+
+ISSUE #12: Tests de sincronizacion
+
+Titulo
+======
+Testing: Crear tests para sincronizacion offline-first
+
+Descripcion
+===========
+Implementar tests especificos para validar la sincronizacion funciona
+correctamente incluyendo scenarios offline y conflictos.
+
+Tareas
+======
+- Crear app/src/test/java/com/dam/simonmedijo/records/remote/SyncScenarios.kt
+  - Test 1: Cambio local sin conexion → sincroniza cuando hay conexion
+  - Test 2: Cambio remoto mientras offline → se descarga al conectar
+  - Test 3: Conflicto (cambio local y remoto) → resuelve por timestamp
+  - Test 4: Error en sync → retry automatico
+  - Test 5: Usuario offline prolongado → cachea cambios
+  - Test 6: Borrado local, cambio remoto → conflicto resolution
+
+- Crear app/src/test/java/com/dam/simonmedijo/records/remote/SyncWorkerTest.kt
+  - Test que WorkManager ejecuta sync
+  - Test que respeta configuracion de bateria
+  - Test que reintenta en fallos
+  - Test que sincroniza cambios pendientes
+
+- Crear helpers:
+  - Simular desconexion (mock sin red)
+  - Inyectar conflictos
+  - Forzar fallos de sincronizacion
+  - Verificar estado de queue
+
+Consideraciones
+===============
+- Tests deben ser deterministicos
+- No depender de orden de ejecucion
+- Limpiar estado entre tests
+- Mocks de conectividad
+
+Aceptacion
+==========
+- 6+ test cases de sync creados
+- Scenarios offline-first probados
+- Conflictos resueltos correctamente
+- WorkManager tests pasan
+- Documentacion clara
+
+Rama
+====
+feature/records-testing
+
+---
+
+ISSUE #13: Actualizar UI para mostrar estado de sincronizacion
+
+Titulo
+======
+UI: Mostrar estado de sincronizacion en interfaz
+
+Descripcion
+===========
+Actualizar la UI para mostrar al usuario el estado de sincronizacion
+con MongoDB y permitir acciones manuales.
+
+Tareas
+======
+- Modificar UI.kt:
+  - Agregar indicador de estado sync (icono/color)
+  - Mostrar "Sincronizando..." cuando activo
+  - Mostrar "Offline" cuando sin conexion
+  - Mostrar "Sincronizado hace X minutos"
+  - Mostrar error si falla sync
+
+- Agregar boton/menu de opciones:
+  - "Sincronizar ahora" (fuerza sync manual)
+  - "Ver historial de records" (incluye sync status)
+  - "Configuracion de sincronizacion"
+
+- Colores semanticos:
+  - Verde: Sincronizado
+  - Amarillo: Sincronizando
+  - Rojo: Error
+  - Gris: Offline
+
+- Actualizaciones tiempo real:
+  - Observar SyncStatus de ViewModel
+  - Actualizar UI con StateFlow
+  - Transiciones suaves
+
+Consideraciones
+===============
+- No bloquear UI en sync
+- Mostrar feedback visual clara
+- Accesibilidad (describir para screen readers)
+- Adaptarse a modo oscuro
+
+Aceptacion
+==========
+- Indicadores de sync visibles
+- Botones de sync funcionan
+- Estados se actualizan en tiempo real
+- UI compilable
+- Tests de UI componentes pasan
+
+Rama
+====
+feature/records-ui-migration
+
+---
+
+ISSUE #14: Crear herramienta de migracion de datos
+
+Titulo
+======
+Tools: Crear utilidad para migrar datos entre backends
+
+Descripcion
+===========
+Crear una herramienta que permite al usuario migrar sus datos guardados
+entre diferentes backends (SharedPreferences <-> SQLite <-> MongoDB).
+
+Tareas
+======
+- Crear app/src/main/java/com/dam/simonmedijo/records/tools/DataMigration.kt
+  - Exportar datos de backend A
+  - Importar datos en backend B
+  - Validar integridad datos
+  - Crear backup antes de migrar
+
+- Crear app/src/main/java/com/dam/simonmedijo/records/tools/BackupManager.kt
+  - Crear backup de records
+  - Exportar a JSON
+  - Importar desde JSON
+  - Timestamp de backups
+
+- Agregar opciones en settings:
+  - "Migrar a MongoDB"
+  - "Exportar datos"
+  - "Importar datos"
+  - "Crear backup"
+  - "Ver backups"
+
+- Documentar en docs/MIGRATION.md:
+  - Pasos para migrar
+  - Que pasa con datos antiguos
+  - Como revertir migracion
+  - Troubleshooting
+
+Seguridad
+=========
+- Validar datos antes de importar
+- Crear backup automatico previo
+- Verificar integridad post-migracion
+- Logging de operaciones
+
+Aceptacion
+==========
+- DataMigration.kt implementado
+- BackupManager.kt implementado
+- UI de migracion funciona
+- Datos migrables sin perdida
+- Tests de migracion pasan
+- Documentacion clara
+
+Rama
+====
+feature/records-ui-migration
+
+---
+
+ISSUE #15: Documentacion completa de implementacion
+
+Titulo
+======
+Docs: Documentacion final de arquitectura multi-backend
+
+Descripcion
+===========
+Crear documentacion completa que explique la arquitectura multi-backend
+para desarrolladores nuevos y para agentes IA.
+
+Tareas
+======
+- Actualizar README.md:
+  - Agregar seccion "Multi-Backend Architecture"
+  - Explicar 3 backends
+  - Diagram ASCII de flujo
+
+- Crear docs/ARCHITECTURE.md (si no existe):
+  - Patrones utilizados
+  - Decisiones de diseño
+  - Responsabilidades
+  - Flujos de datos
+
+- Crear docs/MONGODB_SETUP.md:
+  - Como crear cluster MongoDB Atlas
+  - Como obtener credenciales
+  - Como configurar en desarrollo
+  - Como configurar en produccion
+
+- Crear docs/API.md:
+  - Documentacion de interfaces publicas
+  - Ejemplos de uso
+  - Casos comunes
+  - Troubleshooting
+
+- Crear docs/TESTING.md:
+  - Como ejecutar tests
+  - Como agregar tests nuevos
+  - Coverage requerido
+  - Mocks y fixtures
+
+- Crear docs/DEPLOYMENT.md:
+  - Como deployar con MongoDB
+  - Checklist pre-deployment
+  - Como monitorear sync
+  - Rollback procedure
+
+- Agregar inline comments al codigo:
+  - KDoc para todas las clases publicas
+  - Comentarios en logica compleja
+  - Ejemplos en factory methods
+
+Contenido Minimo
+================
+- Cada doc debe tener indice
+- Ejemplos de codigo incluidos
+- Diagrams ASCII para flujos
+- Links entre documentos
+- Versionado de docs
+
+Aceptacion
+==========
+- 6+ documentos creados
+- Minimo 2000 palabras total
+- Todos los documentos linkeados
+- Ejemplos de codigo funcionan
+- Listo para onboarding
+
+Rama
+====
+feature/records-docs
+
+---
+
+CONSOLIDACION FINAL
+===================
+
+Despues de completar todos los issues:
+
+1. Crear rama principal: release/1.2-multi-backend
+2. Hacer merge de todas las feature branches
+3. Resolver conflictos si los hay
+4. Crear tag: v1.2
+5. Hacer merge final a develop
+6. Documentar en CHANGELOG.md
+7. Preparar release notes
+
+Criterios de Exito Finales
+==========================
+✓ Todos 15 issues completados
+✓ 80%+ coverage de tests
+✓ Documentacion exhaustiva
+✓ Arquitectura implementada correctamente
+✓ Sin breaking changes en API
+✓ Performance aceptable
+✓ Sincronizacion funciona offline-first
+✓ Listo para que agentes IA ejecuten nuevas features
+
