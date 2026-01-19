@@ -48,6 +48,34 @@ ViewModel que centraliza la lógica del juego, gestionando la secuencia de color
 
 Contiene la interfaz del juego, incluyendo los botones de colores, el panel de texto, los contadores de ronda y récord, y la reproducción de sonidos según la secuencia y el estado.
 
+### 6. Persistencia de Datos con MongoDB Realm
+
+A partir de la versión 1.1, la aplicación utiliza **MongoDB Realm** para persistencia local de récords sin necesidad de backend:
+
+#### Componentes:
+
+- **`RealmRecordModel.kt`**: Modelo de datos que Realm persiste automáticamente
+- **`RecordRealmRepository.kt`**: Repository con operaciones CRUD (Create, Read, Update, Delete)
+- **`RecordRealmImpl.kt`**: Implementación de la interfaz `HistorialRecord` con Realm
+- **`HistorialRecord.kt`**: Interfaz que permite cambiar la implementación de persistencia
+
+#### Características:
+
+✅ **Persistencia 100% local** en el dispositivo sin conexión a internet  
+✅ **Encriptación automática** de datos sensibles  
+✅ **Timestamp automático** en milisegundos  
+✅ **Fecha legible** en formato dd/MM/yyyy HH:mm:ss  
+✅ **Transacciones atómicas** garantizando consistencia de datos  
+✅ **Sin backend** necesario
+
+#### Flujo de persistencia:
+
+1. El usuario termina el juego con un nuevo récord
+2. Se crea un objeto `Record` con la ronda máxima y timestamp actual
+3. Se guarda automáticamente en MongoDB Realm
+4. Al reiniciar la app, se carga el récord guardado
+5. La interfaz muestra la ronda máxima y la fecha en que se obtuvo
+
 ---
 
 ## Flujo de estados en el código

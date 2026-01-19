@@ -5,20 +5,21 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dam.simonmedijo.data.RecordRoom
+import com.dam.simonmedijo.data.HistorialRecord
+import com.dam.simonmedijo.data.RecordRealmImpl
 import kotlinx.coroutines.launch
 
 class MyVM : ViewModel() {
 
     var posicion = 0
 
-    private lateinit var historialRecord: RecordRoom
+    private lateinit var historialRecord: HistorialRecord
     private val _recordConFecha = mutableStateOf<Record?>(null)
     val recordConFecha: State<Record?> get() = _recordConFecha
 
-    /** Inicializa Room para manejar récords */
+    /** Inicializa MongoDB Realm para manejar récords de forma persistente */
     fun inicializarHistorial(context: Context) {
-        historialRecord = RecordRoom(context)
+        historialRecord = RecordRealmImpl(context)
         cargarRecordInicial()
     }
 
@@ -89,16 +90,21 @@ class MyVM : ViewModel() {
         Datos.estado.value = Estado.IDLE
     }
 
-    /** Comprueba si la ronda actual supera el récord y lo guarda usando Room */
+    /** Comprueba si la ronda actual supera el récord y lo guarda usando MongoDB Realm */
     fun comprobarRecord() {
         if (Datos.ronda.value > Datos.record.value) {
             Datos.record.value = Datos.ronda.value
             val nuevoRecord = Record.crearDesdeRonda(Datos.ronda.value)
             _recordConFecha.value = nuevoRecord
 
-            // Guardar récord en Room de forma segura
+            // Guardar récord en MongoDB Realm de forma segura usando corrutinas
             viewModelScope.launch {
-                historialRecord.guardarRecord(nuevoRecord)
+                try {
+                    historialRecord.guardarRecord(nuevoRecord)
+                    android.util.Log.i("MyVM", "Récord guardado exitosamente en Realm: ${nuevoRecord.maxRonda} - ${nuevoRecord.fechaTexto}")
+                } catch (e: Exception) {
+                    android.util.Log.e("MyVM", "Error al guardar récord en Realm: ${e.message}")
+                }
             }
         }
     }

@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("kapt") // necesario para Room
+    id("io.realm.kotlin") // MongoDB Realm
 }
 
 android {
@@ -60,6 +61,9 @@ dependencies {
     implementation("androidx.room:room-runtime:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
+
+    // MongoDB Realm (versión 12.0+)
+    implementation("io.realm.kotlin:library-base:12.0.0")
 
     // Kotlin Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
