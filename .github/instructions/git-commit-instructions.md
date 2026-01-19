@@ -1,0 +1,2 @@
+- Haz los commits en "Castellano"
+- Manten la estructura de mensajes cortos y luego en la descripción mejor explicado (no tan exxtensa), facil de entender y sin tanto tecnicismo
