@@ -28,18 +28,4 @@ interface RecordDao {
 
     @Query("DELETE FROM records")
     suspend fun deleteAll()
-
-//    @Query("SELECT * FROM records ORDER BY maxRonda DESC, tiemposMS ASC LIMIT 10")
-//    suspend fun getTop10(): List<RecordsEntity>
-
-//    @Query("DELETE FROM records WHERE ID NOT IN (SELECT id FROM records ORDER BY maxRonda DESC, tiempoMS ASC LIMIT 10)")
-//
-//    @Transaction
-//    suspend fun insertAndTrim(record: RecordsEntity){
-//        insert(record)
-//        trimToTop10()
-//    }
-
-//    @Query("DELETE FROM records")
-//    suspend fun deleteAll()
 }
